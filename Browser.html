@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Browser Simulation</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            background-color: #f9f9f9;
+            overflow-y: auto; /* Ensure the body is scrollable */
+        }
+
+        #toggle-password {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto; /* Pushes the icon to the right edge of the input */
+            margin-right: 10px; /* Adjusts the space between the icon and the outer border */
+        }
+
+        #eye-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .banner {
+            width: 100%;
+            height: 200px;
+            background-image: url('banner-image.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .profile-table {
+            margin: 20px auto;
+            width: 50%;
+            border-collapse: collapse;
+        }
+        .profile-table td {
+            padding: 10px;
+        }
+
+        /* Ensure the browser container can grow with its content */
+        .browser {
+            width: 1000px;
+            min-height: 100vh; /* Ensure it takes at least the full viewport height */
+            height: auto; /* Allow it to grow with its content */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            position: relative;
+            padding-top: 20px; /* Add padding to the top */
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ccc;
+        }
+        .toolbar button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .toolbar button svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .profile-button-black {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: black; /* Set background color to black */
+            border: 2px solid black; /* Set border color to black */
+            color: white; /* Set text color to white */
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            }
+
+            .profile-button-black:hover {
+            background-color: white; /* Change background color on hover */
+            color: black; /* Change text color on hover */
+            }
+
+            .profile-button-black svg {
+            fill: white; /* Set icon color to white */
+            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+            }
+
+            .profile-button-black:hover svg {
+            fill: black; /* Change icon color on hover */
+            }
+
+        .address-bar {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+        }
+        .address-bar input {
+            width: 100%;
+            padding: 5px;
+            margin-right: 10px;
+        }
+        .lock {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        .profile-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #007bff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            display: inline-flex;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            overflow: visible;
+            top: 20px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .profile-icon:hover .dropdown-content,
+        .profile-icon:focus-within .dropdown-content,
+        .dropdown-content:hover {
+            display: block;
+        }
+
+        /* Ensure the content area can grow with its content */
+        .content {
+        padding: 20px;
+        flex-grow: 1; /* Allow the content to grow */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start; /* Align items at the start */
+        text-align: center;
+        width: 100%; /* Ensure it takes the full width */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+
+        .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: gray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .icon img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        .buttons {
+            margin-bottom: 20px;
+        }
+        .buttons button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            margin: 10px 0;
+            background-color: white;
+            border: 2px solid #007bff;
+            color: #007bff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .buttons button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .buttons button svg {
+            margin-right: 10px;
+        }
+        .favorites {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .favorites button {
+            flex: 1;
+            background-color: white;
+            border: 2px solid #007bff;
+            color: #007bff;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .favorites button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .favorites-title {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #007bff;
+        }
+        .popup {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: black;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 1000;
+        }
+        .popup button {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+        .card-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            align-items: stretch;
+            }
+
+        .card {
+                flex: 1;
+                margin: 10px;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+                }
+
+        .card img {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                }
+
+        .card-header, .card-date {
+                padding: 10px;
+                text-align: center;
+                flex-grow: 1;
+                }
+        .card-date {
+            color: gray;
+            font-size: 0.9em;
+        }
+        .profile-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px;
+            padding: 10px 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .profile-button:hover {
+            background-color: #e0e0e0;
+        }
+        .profile-button img {
+            border-radius: 50%;
+            margin-right: 10px;
+            width: 24px;
+            height: 24px;
+        }
+        .profile-button svg {
+            margin-right: 10px;
+        }
+        .header {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .back-container {
+            text-align: left;
+            width: 100%;
+        }
+        .notification-container {
+            text-align: right;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .back-arrow {
+            font-weight: bold;
+            color: #000;
+            font-size: 32px;
+        }
+        .notification {
+            display: flex;
+            align-items: center;
+            background-color: black;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .notification .icon {
+            background-color: white;
+            color: black;
+            border-radius: 50%;
+            padding: 5px;
+            margin-right: 10px;
+        }
+        .content-box {
+            border: 2px solid black;
+            box-sizing: border-box;
+            width: 100%; 
+            max-width: 100%;
+        }
+        .blue-button {
+            background-color: blue;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .blue-button:hover {
+            background-color: darkblue;
+        }
+        .finsta-header {
+            width: 100%;
+            height: 100%; /* Adjust the height as needed */
+            background-image: url('SnapGramHeader.svg');
+            background-size: cover;
+            background-position: center;
+            }
+        .alert-message {
+            font-size: 36px;
+            display: flex;
+            align-items: center;
+        }
+        .alert-message .icon {
+            background-color: yellow;
+            color: black;
+            border-radius: 50%;
+            padding: 5px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+        .current-time {
+            text-align: right;
+            font-weight: bold;
+            font-size: 24px;
+        }
+        .profile-info {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+        }
+        .profile-info .profile-icon {
+            margin-right: 10px;
+        }
+        .profile-info .email {
+            font-size: 16px;
+            font-style: italic;
+            margin-left: 10px;
+        }
+
+        .profile-container {
+            display: flex;
+            align-items: flex-start;
+        }
+        .profile-image {
+            flex-shrink: 0;
+        }
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start; /* Ensure text is left-aligned */
+        }
+        .profile-header {
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .profile-header h2 {
+            margin-left: 10px;
+        }
+        .profile-info p {
+            margin: 5px 0;
+        }
+
+        .content-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid black;
+            padding: 10px 0;
+            text-decoration: none;
+            color: inherit;
+        }
+        .content-row:last-child {
+            border-bottom: none;
+        }
+        .content-row .profile-icon {
+            margin-right: 10px;
+        }
+        .content-row .time {
+            font-weight: bold;
+        }
+        .content-row .left-column {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            width: 200px;
+        }
+        .content-row .middle-column {
+            text-align: left;
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+        .content-row .middle-column .icon {
+            background-color: yellow;
+            color: black;
+            border-radius: 50%;
+            padding: 5px;
+            margin-right: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+        .world-icon {
+            fill: black; /* Set the fill color to black */
+            width: 24px; /* Set the width of the icon */
+            height: 24px; /* Set the height of the icon */
+            margin-right: 10px; /* Add some space to the right of the icon */
+            vertical-align: middle; /* Align the icon vertically in the middle */
+            }
+        .greeting-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        /* Toggle Switch CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px; /* Adjusted width */
+            height: 14px; /* Adjusted height */
+            }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #888;
+            transition: .4s;
+            border-radius: 34px;
+            }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 12px; /* Adjusted height */
+            width: 12px; /* Adjusted width */
+            left: 1px; /* Adjusted left position */
+            bottom: 1px; /* Adjusted bottom position */
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            border: 2px solid #ccc; /* Add a border to the switch */
+            }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+            }
+
+        input:checked + .slider:before {
+            transform: translateX(14px); /* Adjusted for new size */
+            border-color: #2196F3; /* Change border color when checked */
+        }
+        #greeting {
+            margin: 0;
+            font-size: 16px;
+        }
+    </style>
+
+    <script>
+        const pages = {
+            'home.html': `
+                <h1>Welcome</h1>
+                <div class="icon" id="profile-icon"></div>
+                <h2 id="profile-name"></h2>
+                <div class="buttons">
+                    <button onclick="navigate('history.html')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                        </svg>
+                        Browsing History
+                    </button>
+                    <button onclick="navigate('settings.html')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8.2 3.7 8.2 8.2-3.7 8.2-8.2 8.2zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                        </svg>
+                        Account Settings
+                    </button>
+                    <button onclick="navigate('inbox.html')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M20 4H4v13h16V4zm-2 11H6V6h12v9zm-6-7l-6 4h12l-6-4z"/>
+                        </svg>
+                        Email Inbox
+                    </button>
+                </div>
+                <div class="favorites-title">Favorites</div>
+                <div class="favorites">
+                    <button onclick="navigate('CapitalTwo.com')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 2L1 9h2v11h6V14h6v6h6V9h2L12 2zm0 2.5L18.5 9h-13L12 4.5zM5 11h14v2H5v-2z"/>
+                        </svg>
+                        Bank Site
+                    </button>
+                    <button onclick="navigate('snapgram.com')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8s4.4 9.8 9.8 9.8 9.8-4.4 9.8-9.8-4.4-9.8-9.8-9.8zm0 18c-4.5 0-8.2-3.7-8.2-8.2s3.7-8.2 8.2-8.2 8.2 3.7 8.2 8.2-3.7 8.2-8.2 8.2zm0-14.5c-3.5 0-6.3 2.8-6.3 6.3s2.8 6.3 6.3 6.3 6.3-2.8 6.3-6.3-2.8-6.3-6.3-6.3zm0 11.3c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm5.5-10.8c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/>
+                        </svg>
+                        SnapGram 
+                    </button>
+                    <button onclick="navigate('profile.html')">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8.2 3.7 8.2 8.2-3.7 8.2-8.2 8.2zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                        </svg>
+                        Profiles
+                    </button>
+                </div>
+            `,
+            'history.html': `
+
+                    <br> Browser History
+                </h1>
+                <div class="icon" id="profile-icon"></div>
+                <h2 id="profile-name"></h2>
+                <h3 style="text-align: left; margin-left: 20px;">Yesterday</h3>
+                <div class="content-box">
+                    <div id="browsing-history">
+                    <div class="content-row">
+                        <div class="left-column"><strong>8:30 AM</strong></div>
+                        <div class="middle-column">SnapGram</div>
+                        <div class="right-column"><a href="#" onclick="navigate('snapgram.com')">https://snapgram.com</a></div>
+                    </div>
+                    <div class="content-row">
+                        <div class="left-column"><strong>8:15 AM</strong></div>
+                        <div class="middle-column">Capital Two Bank</div>
+                        <div class="right-column"><a href="#" onclick="navigate('CapitalTwo.com')">https://capitaltwobank.com</a></div>
+                    </div>
+                    <div class="content-row">
+                        <div class="left-column"><strong>8:13 AM</strong></div>
+                        <div class="middle-column">Email: Suspicious activity</div>
+                        <div class="right-column"><a href="#" onclick="navigate('email.html')">https://email.html</a></div>
+                    </div>
+                    <div class="content-row">
+                        <div class="left-column"><strong>8:11 AM</strong></div>
+                        <div class="middle-column">Email Inbox</div>
+                        <div class="right-column"><a href="#" onclick="navigate('inbox.html')">https://inbox.html</a></div>
+                    </div>
+                    <div class="content-row">
+                        <div class="left-column"><strong>8:09 AM</strong></div>
+                        <div class="middle-column">Capital Two Bank</div>
+                        <div class="right-column"><a href="#" onclick="navigate('capit0ltw0bank.html')">http://capit0ltw0bank.html</a></div>
+                    </div>
+                    </div>
+                </div>
+            `,
+            'settings.html': `
+              <!--   <h1>Phoogle account security</h1>
+                    <div class="person-shield-icon-container">
+                        <svg class="person-shield-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100" height="100">
+                            <path d="M12 2L4 5v6c0 5.25 3.75 10.74 8 12 4.25-1.26 8-6.75 8-12V5l-8-3zm0 2.18l6 2.25v5.57c0 4.25-2.75 8.74-6 9.93-3.25-1.19-6-5.68-6-9.93V6.43l6-2.25z"/>
+                            <path d="M12 8c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2s2-.9 2-2v-4c0-1.1-.9-2-2-2zm0 2h.01L12 14h-.01L12 10z"/>
+                        </svg>
+                    </div>
+                <div class="icon" id="profile-icon"></div>
+                <p></p>
+                <p style="text-align: left;">Your account</p>
+                <h2 id="phishing-info"></h2>
+                <p id="victim-info"></p>
+                <p id="darkweb-info"></p>
+                <p id="social-info"></p>
+                <p id="phoogle-info"></p>
+                <p id="fake_bank"></p>
+                <p id="finsta"></p>
+                <div class="icon" id="profile-icon"></div>
+                <h2 id="profile-name"></h2>
+                <h2 id="profile-email"></h2>
+                --> 
+            `,
+            'inbox.html': `
+                <div class="icon" id="profile-icon"></div>
+                <h2 id="profile-name"></h2>
+                <h2 style="text-align: center;"><i class="fas fa-paper-plane fa-3x"></i></h2>
+                <h1 style="text-align: center;">Phoogle email inbox</h1>
+                <div class="header">
+                    <strong class="back-arrow">Messages</strong>
+                </div>
+                <div class="content-box">
+                    <div class="content-row" id="FinstagramEmail" onclick="navigate('FinstagramEmail.html')">
+                        <div class="left-column">
+                            <i class="fas fa-user profile-icon" style="width: 24px; height: 24px;"></i>
+                            <span>SnapGram </span>
+                        </div>
+                        <span class="middle-column">Sarah Weng liked your post.</span>
+                        <span class="time">7:51 am</span>
+                    </div>
+                     <div class="content-row" id="capitolTwoEmail" onclick="navigate('email.html')">
+                        <div class="left-column">
+                            <i class="fas fa-user profile-icon" style="width: 24px; height: 24px;"></i>
+                            <span>Capital Two Bank</span>
+                        </div>
+                        <span class="middle-column">
+                            Urgent! Suspicious Activity Detected on your Capital-Two Bank Account
+                        </span>
+                        <span class="time">8:09 am</span>
+                    </div>
+                    <div class="content-row" id="JohnEaton" onclick="navigate('johneatonemail.html')">
+                        <div class="left-column">
+                            <i class="fas fa-user profile-icon" style="width: 24px; height: 24px;"></i>
+                            <span>John Eaton</span>
+                        </div>
+                        <span class="middle-column">Agenda for tomorrow's group meeting</span>
+                        <span class="time">7:30 am</span>
+                    </a>
+                </div>
+            `,
+            'CapitalTwo.com': `
+                <h1 style="text-align: center;">
+                    <img src="BankHeader.svg" width="100%">
+                </h1>
+                <div style="background-color: black; color: white; padding: 10px; display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <h1 style="margin: 0; font-size: 24px;">Capital Two Bank</h1>
+                    <div style="text-align: right;">
+                        <span style="font-size: 16px;">Thursday, 5 September 2024</span>
+                        <span style="font-size: 16px; font-weight: bold;"> > Contact us</span>
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <h1 style="font-size: 24px; font-weight: bold;">CAPITAL TWO BANK</h1>
+                    <div style="margin-top: 20px;">
+                        <label for="username" style="display: inline-block; margin-right: 10px; font-size: 16px;">Capital Two ID</label>
+                        <input type="text" id="username" placeholder="Enter your Capital Two ID" style="display: inline-block; margin-right: 10px; padding: 10px; width: 20%; max-width: 200px;">
+                        <label for="password" style="display: inline-block; margin-right: 10px; font-size: 16px;">Password</label>
+                        <input type="password" id="password" placeholder="Enter your password" style="display: inline-block; margin-right: 10px; padding: 10px; width: 20%; max-width: 200px;">
+                        <button onclick="showErrorMessage()" style="background-color: black; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Login</button>
+                        <p id="error-message" style="color: red; display: none;">Your user ID or password is incorrect. Please try again</p>
+                    </div>
+                    <div style="margin-top: 10px; text-align: left; width: 60%; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        <p style="font-size: 14px;">> Forgot your Capitol Two ID?</p>
+                        <p style="font-size: 14px;">> Forgot your password?</p>
+                    </div>
+                    <div style="margin-top: 40px;">
+                        <h2 style="font-size: 20px; font-weight: bold; color: black;">Using Capital Two Internet Banking for the first time?</h2>
+                        <button style="background-color: red; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">Register now</button>
+                    </div>
+                </div>
+            `,
+            'capit0ltw0bank.html': `
+                <h1 style="text-align: center;">
+                     <img src="BankHeader.svg" width="100%">
+                </h1>
+                <h1 style="text-align: center;">Welcome to Capit0l Tw0 Bank</h1>
+                <br><br><br>
+                <div style="text-align: center;">
+                    <label for="username" style="display: block; margin: 10px auto;">Username</label>
+                    <input type="text" id="username" placeholder="add text" style="display: block; margin: 10px auto; padding: 10px; width: 80%; max-width: 300px;" onfocus="hideErrorMessage()">
+                    
+                    <label for="password" style="display: block; margin: 10px auto;">Password</label>
+                    <input type="password" id="password" placeholder="add text" style="display: block; margin: 10px auto; padding: 10px; width: 80%; max-width: 300px;" onfocus="hideErrorMessage()">
+                    
+                    <button onclick="showErrorMessage()" style="background-color: blue; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Sign in</button>
+                    <p id="error-message" style="color: red; display: none;">Your user ID or password is incorrect. Please try again</p>
+                </div>
+            `,
+            'snapgram.com': `
+                <img src="SnapGramHeader.svg" width="100%">
+                    <p></p>
+                    <p></p>
+            <div id="snapgram-content">
+            </div>
+            `,
+            'profile.html': `
+                <div class="container">
+                    <h1>Choose a Profile</h1>
+                    <div class="profile-button" onclick="navigateToBrowser('Leila')">
+                        <img src="leila-avatar.png" alt="Leila">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                        </svg>
+                        <span>Leila</span>
+                    </div>
+                    <div class="profile-button" onclick="navigateToBrowser('Alejandro')">
+                        <img src="alejandro-avatar.png" alt="Alejandro">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                             <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                        </svg>
+                        <span>Alejandro</span>
+                    </div>
+                    <div class="profile-button" onclick="navigateToBrowser('Sofia')">
+                        <img src="sofia-avatar.png" alt="Sofia">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                        </svg>
+                        <span>Sofia</span>
+                    </div>
+                </div>
+            `
+            ,
+            'email.html': `
+             <div class="header" style="padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <table width="100%" style="table-layout: fixed;">
+                        <tr>
+                            <td style="width: 50%;">
+                                <div class="back-container" style="text-align: left;">
+                                    <strong class="back-arrow" onclick="navigate('inbox.html')" style="font-size: 16px; font-weight: bold;">&lt; Back to inbox</strong>
+                                </div>
+                            </td>
+                            <td style="width: 50%;">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="content-box">
+                    <p style="text-align: left;"><strong>To:</strong> <span id="profile-email"></span></p>
+                    <p style="text-align: left;"><strong>From:</strong><a id="email-from" href="mailto:security@capitaltwobank.com">security@capitaltwobank.com</a></p>
+                    <p style="text-align: left;"><strong>Subject:</strong><span id="email-subject">URGENT! Suspicious Activity Detected on Your Capital-Two Bank Account</span></p>
+                    <p class="current-time" id="current-time"></p>
+                    <p>&nbsp;</p>
+                    <p style="text-align: left;">Hello <span id="profile-name"></span>,</p>
+                    <p style="text-align: left;">We have detected suspicious activity on your Capital-Two Bank account and need your immediate attention to secure your account. Please review the details below:</p>
+                    <p style="text-align: left;"><strong>Suspicious Activity Details:</strong></p>
+                    <ul style="text-align: left;">
+                        <li><strong>Date:</strong> <span id="suspicious-date"></span></li>
+                        <li><strong>Amount:</strong> <span id="suspicious-amount"></span></li>
+                        <li><strong>Location:</strong> Unknown</li>
+                    </ul>
+                    <p style="text-align: left;">To protect your account, please verify your information by clicking the link below:</p>
+                    <p style="text-align: center;">
+                        <input class="blue-button" name="VerifyYourAccount" type="button" value="Verify Your Account" onclick="checkBankActivity()" />
+                    </p>
+                    <p style="text-align: left;"><strong>Important:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Failure to verify your account within 24 hours will result in temporary suspension.</li>
+                        <li>Do not share your login details with anyone.</li>
+                    </ul>
+                    <p style="text-align: left;">Thank you for your prompt attention to this matter.</p>
+                    <p style="text-align: left;">Sincerely,</p>
+                    <p style="text-align: left;">Capital-Two Bank Security Team</p>
+                </div>
+                <p>&nbsp;</p>  `,
+
+                'email.html': `
+             <div class="header" style="padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+                    <table width="100%" style="table-layout: fixed;">
+                        <tr>
+                            <td style="width: 50%;">
+                                <div class="back-container" style="text-align: left;">
+                                    <strong class="back-arrow" onclick="navigate('inbox.html')" style="font-size: 16px; font-weight: bold;">&lt; Back to inbox</strong>
+                                </div>
+                            </td>
+                            <td style="width: 50%;">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="content-box">
+                    <p style="text-align: left;"><strong>To:</strong> <span id="profile-email"></span></p>
+                    <p style="text-align: left;"><strong>From:</strong><a id="email-from" href="mailto:security@capitaltwobank.com">security@capitaltwobank.com</a></p>
+                    <p style="text-align: left;"><strong>Subject:</strong><span id="email-subject">URGENT! Suspicious Activity Detected on Your Capital-Two Bank Account</p>
+                    <p class="current-time" id="current-time"></p>
+                    <p>&nbsp;</p>
+                    <p style="text-align: left;">Hello <span id="profile-name"></span>,</p>
+                    <p style="text-align: left;">We have detected suspicious activity on your Capital-Two Bank account and need your immediate attention to secure your account. Please review the details below:</p>
+                    <p style="text-align: left;"><strong>Suspicious Activity Details:</strong></p>
+                    <ul style="text-align: left;">
+                        <li><strong>Date:</strong> <span id="suspicious-date"></span></li>
+                        <li><strong>Amount:</strong> <span id="suspicious-amount"></span></li>
+                        <li><strong>Location:</strong> Unknown</li>
+                    </ul>
+                    <p style="text-align: left;">To protect your account, please verify your information by clicking the link below:</p>
+                    <p style="text-align: center;">
+                        <input class="blue-button" name="VerifyYourAccount" type="button" value="Verify Your Account" onclick="checkBankActivity()" />
+                    </p>
+                    <p style="text-align: left;"><strong>Important:</strong></p>
+                    <ul style="text-align: left;">
+                        <li>Failure to verify your account within 24 hours will result in temporary suspension.</li>
+                        <li>Do not share your login details with anyone.</li>
+                    </ul>
+                    <p style="text-align: left;">Thank you for your prompt attention to this matter.</p>
+                    <p style="text-align: left;">Sincerely,</p>
+                    <p style="text-align: left;">Capital-Two Bank Security Team</p>
+                </div>
+                <p>&nbsp;</p>  `,
+                'FinstagramEmail.html': ` 
+                <div class="header" style="padding: 0 20px;"> 
+                    <div class="back-container" style="text-align: left; width: 100%;"> 
+                        <strong class="back-arrow" onclick="navigate('inbox.html')" style="font-size: 16px; font-weight: bold;">&lt; Back to inbox</strong> 
+                    </div> 
+                </div> 
+                <div class="content-box"> 
+                    <p style="text-align: left;"><strong>To:&nbsp;</strong><span id="profile-email"></span><br /><strong>From:&nbsp;</strong> <b>notifications@SnapGram.com</b>&nbsp;<br /><strong>Subject: Sarah Weng liked your post on SnapGram!</strong>&nbsp;</p>
+                    <p style="text-align: left;">Hi <span id="profile-name"></span>;</p>
+                    <p style="text-align: left;">Sarah Weng just liked your post! 🎉&nbsp</p>
+                    <p style="text-align: left;">&nbsp;<br /><strong>Sarah Weng</strong>&nbsp;<br />@sarahweng&nbsp;</p>
+                    <p style="text-align: left;">&nbsp;Your Post Image&nbsp;</p>
+                    <p style="text-align: left;"><strong>View Post</strong>&nbsp;<br /><a href="#" onclick="navigate('snapgram.com')">Open SnapGram </a>&nbsp;</p>
+                    <p style="text-align: left;">Stay connected and keep sharing your moments with your friends on SnapGram !&nbsp;</p>
+                    <p style="text-align: left;">Best,&nbsp;<br />The SnapGram Team&nbsp;</p>
+                    <p style="text-align: left;">You received this email because you're subscribed to SnapGram notifications. If you don't want to receive these emails in the future, please <u><b>unsubscribe here</u></b>.&nbsp;</p>
+                    <p style="text-align: left;">&copy; 2023 SnapGram, Inc. All rights reserved.&nbsp;<br /><a href="#" onclick="navigate('FinstagramPrivacy.html')">Privacy Policy</a> | <a href="#" onclick="navigate('FinstagramService.html')">Terms of Service</a>&nbsp;</p>
+
+                </div> 
+                
+            `,
+
+            'FinstagramPrivacy.html': ` 
+                <div class="header" style="padding: 0 20px;"> 
+                    <div class="back-container" style="text-align: left; width: 100%;"> 
+                        <strong class="back-arrow" onclick="navigate('inbox.html')" style="font-size: 16px; font-weight: bold;">&lt; Back to inbox</strong> 
+                    </div> 
+                </div> 
+                <div class="content-box"> 
+                    <h1>SnapGram Privacy Policy</h1>
+                    <p>Last updated: October 1, 2023</p>
+
+                    <h3 style="text-align: left;">1. Introduction</h2>
+                    <p style="text-align: left;">Welcome to SnapGram! We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, and share your personal information.</p>
+
+                    <h3 style="text-align: left;">2. Information We Collect</h2>
+                    <p style="text-align: left;">We may collect the following types of information:</p>
+                    <ul>
+                        <li style="text-align: left;"><strong>Personal Information:</strong> Name, email address, phone number, etc.</li>
+                        <li style="text-align: left;"><strong>Usage Data:</strong> Information on how you use our service, such as pages visited and time spent on the site.</li>
+                    </ul>
+
+                    <h3  style="text-align: left;">3. How We Use Your Information</h2>
+                    <p style="text-align: left;">We use your information to:</p>
+                    <ul>
+                        <li style="text-align: left;">Provide and maintain our service</li>
+                        <li style="text-align: left;">Notify you about changes to our service</li>
+                        <li style="text-align: left;">Provide customer support</li>
+                        <li style="text-align: left;">Monitor the usage of our service</li>
+                    </ul>
+
+                    <h3 style="text-align: left;">4. Sharing Your Information</h2>
+                    <p style="text-align: left;">We do not share your personal information with third parties except:</p>
+                    <ul>
+                        <li style="text-align: left;">To comply with legal obligations</li>
+                        <li style="text-align: left;">To protect and defend our rights and property</li>
+                        <li style="text-align: left;">With your consent</li>
+                    </ul>
+
+                    <h3 style="text-align: left;">5. Security of Your Information</h2>
+                    <p style="text-align: left;">We strive to use commercially acceptable means to protect your personal information, but we cannot guarantee its absolute security.</p>
+
+                    <h3 style="text-align: left;">6. Changes to This Privacy Policy</h2>
+                    <p style="text-align: left;">We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page.</p>
+
+                    <h3 style="text-align: left;">7. Contact Us</h2>
+                    <p style="text-align: left;">If you have any questions about this Privacy Policy, please contact us:</p>
+                    <ul>
+                        <li style="text-align: left;">By email: support@SnapGram.com</li>
+                        <li style="text-align: left;">By visiting this page on our website: www.snapgram.com/contact</li>
+                    </ul>
+                </div> 
+                
+            `,
+            'FinstagramService.html': ` 
+                <div class="header" style="padding: 0 20px;"> 
+                    <div class="back-container" style="text-align: left; width: 100%;"> 
+                        <strong class="back-arrow" onclick="navigate('inbox.html')" style="font-size: 16px; font-weight: bold;">&lt; Back to inbox</strong> 
+                    </div> 
+                </div> 
+                <div class="content-box"> 
+                    <h1>SnapGram Terms of Service</h1>
+                        <p>Last updated: October 1, 2023</p>
+
+                        <h3 style="text-align: left;">1. Acceptance of Terms</h2>
+                        <p style="text-align: left;">By accessing or using the SnapGram service, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service.</p>
+
+                        <h3 style="text-align: left;">2. Changes to Terms</h2>
+                        <p style="text-align: left;">We reserve the right to modify these terms at any time. We will notify you of any changes by posting the new terms on this page. Your continued use of the service after any changes constitutes your acceptance of the new terms.</p>
+
+                        <h3 style="text-align: left;">3. User Accounts</h2>
+                        <p style="text-align: left;">To use certain features of our service, you may need to create an account. You are responsible for maintaining the confidentiality of your account information and for all activities that occur under your account.</p>
+
+                        <h3 style="text-align: left;">4. Prohibited Activities</h2>
+                        <p style="text-align: left;">When using SnapGram, you agree not to:</p>
+                        <ul>
+                            <li style="text-align: left;">Violate any laws or regulations</li>
+                            <li style="text-align: left;">Infringe on the rights of others</li>
+                            <li style="text-align: left;">Post harmful or offensive content</li>
+                            <li style="text-align: left;">Engage in fraudulent activities</li>
+                        </ul>
+
+                        <h3 style="text-align: left;">5. Termination</h2>
+                        <p style="text-align: left;">We may terminate or suspend your account and access to the service at our sole discretion, without prior notice, for conduct that we believe violates these terms or is harmful to other users of the service.</p>
+
+                        <h3 style="text-align: left;">6. Limitation of Liability</h2>
+                        <p style="text-align: left;">SnapGram is provided "as is" and "as available" without any warranties of any kind. We are not liable for any damages arising from the use of our service.</p>
+
+                        <h3 style="text-align: left;">7. Governing Law</h2>
+                        <p style="text-align: left;">These terms are governed by and construed in accordance with the laws of [Your Country/State], without regard to its conflict of law principles.</p>
+
+                        <h3 style="text-align: left;">8. Contact Us</h2>
+                        <p style="text-align: left;">If you have any questions about these Terms of Service, please contact us:</p>
+                        <ul>
+                            <li style="text-align: left;">By email: support@SnapGram.com</li>
+                            <li style="text-align: left;">By visiting this page on our website: www.SnapGram.com/contact</li>
+                        </ul>
+                </div> 
+                
+            `,
+            'johneatonemail.html': ` 
+                <div class="header" style="padding: 0 20px;"> 
+                    <div class="back-container" style="text-align: left; width: 100%;"> 
+                        <strong class="back-arrow" onclick="navigate('inbox.html')" style="font-size: 16px; font-weight: bold;">&lt; Back to inbox</strong> 
+                    </div> 
+                </div> 
+                <div class="content-box"> 
+                    <p style="text-align: left;"><strong>Subject: Agenda for Tomorrow's Meeting - Phoogle Product Design</strong>&nbsp;</p>
+                    <p style="text-align: left;"><strong>To:</strong> team@phooglemail.com&nbsp;<br /><strong>From:</strong> john.eaton@phooglemail.com&nbsp;</p>
+                    <p style="text-align: left;">Hi Team,&nbsp;</p>
+                    <p style="text-align: left;">Here is the agenda for tomorrow's meeting:&nbsp;</p>
+                    <p style="text-align: left;">&nbsp;<br /><strong>Time:</strong> 10:00 AM - 11:30 AM&nbsp;<br /><strong>Location:</strong> Conference Room 106&nbsp;</p>
+                    <p style="text-align: left;"><strong>Meeting Agenda</strong>&nbsp;</p>
+                    <p style="text-align: left;"><strong>1. Welcome and Review Agenda (10:00 AM - 10:10 AM) </strong></p>
+                    <ul style="list-style-type: circle;">
+                    <li style="text-align: left;">John Eaton, Project Manager, New Product Development</li>
+                    </ul>
+                    <p style="text-align: left;"><strong>2. Project Updates: Phoogle Smartwatch (10:10 AM - 10:30 AM) </strong></p>
+                    <ul style="list-style-type: circle;">
+                    <li style="text-align: left;">Prototype testing results &ndash; Leila</li>
+                    <li style="text-align: left;">Adjustments based on user feedback Client</li>
+                    </ul>
+                    <p style="text-align: left;"><strong>3. Feedback: Phoogle Home Security Camera (10:30 AM - 10:50 AM) </strong></p>
+                    <ul style="list-style-type: circle;">
+                    <li style="text-align: left;">Summary of feedback from the latest client meeting &ndash; Alejandro</li>
+                    <li style="text-align: left;">Identifying key areas for improvement</li>
+                    <li style="text-align: left;">Assigning action items to team members</li>
+                    </ul>
+                    <p style="text-align: left;"><strong>4.Marketing Strategy for Upcoming Product Launch (10:50 AM - 11:10 AM) </strong></p>
+                    <ul style="list-style-type: circle;">
+                    <li style="text-align: left;">Social media campaign ideas/overview &ndash; Product reveal on SnapGram - Sofia Schedule meeting with marketing to create timeline</li>
+                    </ul>
+                    <p style="text-align: left;"><strong>5. Q&amp;A and Open Discussion (11:10 AM - 11:30 AM) </strong></p>
+                    <ul style="list-style-type: circle;">
+                    <li style="text-align: left;">Open discussion for any additional questions or topics</li>
+                    </ul>
+                    <p style="text-align: left;"><strong>Zoom Meeting Details</strong>&nbsp;</p>
+                    <p style="text-align: left;"><strong>Join Zoom Meeting:</strong> <a href="https://zoom.us/j/8675309">Zoom Link</a>&nbsp;<br /><strong>Meeting ID:</strong> 867 5309&nbsp;<br /><strong>Passcode:</strong> Phoogle2023&nbsp;</p>
+                    <p style="text-align: left;">Please come prepared with any updates or questions you may have. Looking forward to a productive meeting!&nbsp;</p>
+                    <p style="text-align: left;">Best regards,&nbsp;<br />John Eaton&nbsp;<br />Project Manager, Phoogle&nbsp;</p>
+                    <p style="text-align: left;"><strong>Phoogle Product Design</strong>&nbsp;<br />123 Innovation Drive, Suite 456&nbsp;<br />Design City, CA 78901&nbsp;<br /><a href="http://www.Phoogle.com/">www.Phoogle.com</a>&nbsp;</p>
+                </div> 
+            `
+        };
+
+        let historyStack = ['profile.html'];
+        let currentIndex = 0;
+        let profileParams = new URLSearchParams();
+  
+        function showDropdown() {
+            console.log('Showing dropdown');
+            document.getElementById('profile-dropdown').style.display = 'block';
+        }
+
+        function hideDropdown() {
+            document.getElementById('profile-dropdown').style.display = 'none';
+        }
+
+        function navigate(page) {
+            if (pages[page]) {
+                document.getElementById('content').innerHTML = pages[page];
+                
+                // Check the current profile and set the address bar value
+                if (page === 'email.html') {
+                    const profileName = profileParams.get('name');
+                    if (profileName === 'Leila') {
+                        document.getElementById('address').value = 'urgentemail.html';
+                    } else if (profileName === 'Alejandro') {
+                        document.getElementById('address').value = 'email.html';
+                    }
+                } else {
+                    document.getElementById('address').value = page === 'profile.html' ? '' : page;
+                }
+                
+                historyStack = historyStack.slice(0, currentIndex + 1);
+                historyStack.push(page);
+                currentIndex++;
+                console.log('Navigated to:', page, 'with params:', profileParams.toString());
+                updateLockIcon(page);
+                
+                if (page !== 'profile.html') {
+                    updateProfileInfo(profileParams);
+                }
+                
+                if (page === 'inbox.html') {
+                    updateInboxContent(profileParams);
+                }
+                
+                if (page === 'email.html') {
+                    updateProfileInfo(profileParams);
+                    updateSuspiciousDate();
+                    updateSuspiciousAmount(profileParams);
+                }
+            }
+            console.log('Navigated to AFTER function call:', page, 'with params:', profileParams.toString());
+        }
+
+        function checkBankActivity() {
+            const fakeBank = profileParams.get('fake_bank');
+            if (fakeBank === 'yes') {
+                navigate('capit0ltw0bank.html');
+            } else {
+                navigate('CapitalTwo.com');
+            }
+        }
+
+        function goBack() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                const page = historyStack[currentIndex];
+                console.log('Going back to:', page, 'with profileParams:', profileParams);
+                document.getElementById('content').innerHTML = pages[page];
+                document.getElementById('address').value = page === 'profile.html' ? '' : page;
+                updateLockIcon(page);
+                updateProfileInfo(profileParams);
+                if (page === 'inbox.html') {
+                    updateInboxContent(profileParams);
+                }
+            }
+        }
+
+        function goForward() {
+            if (currentIndex < historyStack.length - 1) {
+                currentIndex++;
+                const page = historyStack[currentIndex];
+                document.getElementById('content').innerHTML = pages[page];
+                document.getElementById('address').value = page === 'profile.html' ? '' : page;
+                console.log('Going forward to:', page, 'with params:', profileParams);
+                updateLockIcon(page);
+                updateProfileInfo(profileParams);
+                if (page === 'inbox.html') {
+                    updateInboxContent(profileParams);
+                }
+            }
+        }
+
+        function updateLockIcon(page) {
+            const lockIcon = document.querySelector('.lock');
+            const popup = document.getElementById('popup');
+            if (page === 'profile.html' || page === 'capit0ltw0bank.html') {
+                lockIcon.textContent = '🔓'; // Unlock icon
+                popup.innerHTML = `
+                    <p>This page is not secure.</p>
+                    <button onclick="closePopup()">Close</button>
+                `;
+            } else {
+                lockIcon.textContent = '🔒'; // Lock icon
+                popup.innerHTML = `
+                    <p>Security<br>This site is secure. All data transmitted is encrypted. The site's security credentials are valid and up to date.</p>
+                    <button onclick="closePopup()">Close</button>
+                `;
+            }
+        }
+
+        function showPopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'block';
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        }
+
+        function redirectToProfile() {
+            navigate('home.html');
+        }
+
+        function navigateToBrowser(profile) {
+            profileParams = new URLSearchParams();
+            if (profile === 'Leila') {
+                profileParams.append('name', 'Leila');
+                profileParams.append('email', 'Leila@phooglemail.com');
+                profileParams.append('phishing', 'yes');
+                profileParams.append('victim', 'yes');
+                profileParams.append('darkweb', 'last changed: 6 months ago_Phoogle Account Password leaked: 10 months_email: Leila@phooglemail.com_bank: User ID and Password for capitaltwobank.com exposed 6 months ago_credit: Visa card ending in 8977');
+                profileParams.append('social', 'secure');
+                profileParams.append('phoogle', 'complex');
+                profileParams.append('fake_bank', 'yes');
+                profileParams.append('password', 'SWUITM41DHTBTE!');
+                finstaValue = '@LeilaAndMyDog';
+            } else if (profile === 'Alejandro') {
+                profileParams.append('name', 'Alejandro');
+                profileParams.append('email', 'Alejandro@phooglemail.com');
+                profileParams.append('phishing', 'yes');
+                profileParams.append('victim', 'no');
+                profileParams.append('darkweb', 'last changed: 5 months ago_email: Password for  Alejandro@phooglemail.com, detected 4 months ago_phone: number ending in 1549_address: 123 Sesame St');
+                profileParams.append('social', 'public');
+                profileParams.append('phoogle', 'weak');
+                profileParams.append('fake_bank', 'yes');
+                profileParams.append('password', 'Cinnamon914');
+                finstaValue = '@AlejandroAndMyDog';
+            } else if (profile === 'Sofia') {
+                profileParams.append('name', 'Sofia');
+                profileParams.append('email', 'Sofia@phooglemail.com');
+                profileParams.append('phishing', 'no');
+                profileParams.append('victim', 'no');
+                profileParams.append('darkweb', 'last changed: 5 months ago_email: Sofia@phooglemail.com, detected 4 months ago_phone: number ending in 6284');
+                profileParams.append('social', 'secure');
+                profileParams.append('phoogle', 'complex');
+                profileParams.append('fake_bank', 'no');
+                profileParams.append('password', 'SoFia501!');
+                finstaValue = '@SofiaAndMyDog';
+            }
+            profileParams.append('finsta', finstaValue);
+            navigate('home.html');
+            console.log(profileParams.toString()); 
+            document.getElementById('address').value = 'home.html';
+        }
+
+        function updateSuspiciousDate() {
+            // FUNCTION CALLED IN EMAIL.HTML
+            const dateElement = document.getElementById('suspicious-date');
+            if (dateElement) {
+                const today = new Date();
+                const suspiciousDate = new Date(today);
+                suspiciousDate.setDate(today.getDate() - 2); // Adjust to a day or two prior
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                dateElement.textContent = suspiciousDate.toLocaleDateString('en-US', options);
+                console.log('Suspicious Date:', suspiciousDate.toLocaleDateString('en-US', options)); // Debugging
+            } else {
+                console.warn('Element with ID suspicious-date not found');
+            }
+        }
+
+        function updateProfileInfo(params) {
+            const profileInfo = {
+            name: params.get('name') || 'Leila',
+            email: params.get('email'),
+            phishing: params.get('phishing'),
+            victim: params.get('victim'),
+            darkweb: params.get('darkweb'),
+            social: params.get('social'),
+            phoogle: params.get('phoogle'),
+            fake_bank: params.get('fake_bank'),
+            finsta: params.get('finsta'),
+            password: params.get('password')
+        };
+        console.log('Profile Info:', profileInfo); // Debugging
+        
+        // Update profile name and email
+        const profileNameElements = document.querySelectorAll('#profile-name');
+            profileNameElements.forEach(element => {
+            element.textContent = profileInfo.name;
+            });
+
+        const profileEmailElement = document.getElementById('profile-email');
+            if (profileEmailElement) {
+            profileEmailElement.textContent = profileInfo.email;
+            } else {
+            console.warn('Element with ID profile-email not found');
+            }
+
+        const profileIconElement = document.getElementById('profile-icon');
+            let iconSrc;
+            if (profileIconElement) {
+                if (profileInfo.name === 'Leila') {
+                iconSrc = 'leila-avatar.png';
+                } else if (profileInfo.name === 'Alejandro') {
+                iconSrc = 'alejandro-avatar.png';
+                } else if (profileInfo.name === 'Sofia') {
+                iconSrc = 'sofia-avatar.png';
+                }
+                profileIconElement.innerHTML = `<img src="${iconSrc}" alt="${profileInfo.name}">`;
+            } else {
+                console.warn('Element with ID profile-icon not found');
+            }
+            console.log('Icon Source:', iconSrc); // Debugging
+
+            // Update social button
+            updateSocialButton(profileInfo);
+
+            // Update darkweb info
+            const darkwebInfoElement = document.getElementById('darkweb-info');
+            const passwordInfoElement = document.getElementById('password-info');
+            if (darkwebInfoElement) {
+    // Split the darkweb data
+    const darkwebItems = profileInfo.darkweb.split('_');
+    
+    // Store the first item in a separate constant
+    const PasswordChange = darkwebItems.shift();
+    
+    // Process the remaining items
+    const darkwebData = darkwebItems.map(item => `<li>${item.charAt(0).toUpperCase() + item.slice(1)}</li>`).join('');
+    
+    // Update the innerHTML of the darkwebInfoElement
+    passwordInfoElement.innerHTML =`${PasswordChange}`;
+    darkwebInfoElement.innerHTML = `<ul>${darkwebData}</ul>`;
+    
+    // Debugging
+    console.log('Updated darkweb-info with:', darkwebInfoElement.innerHTML);
+    console.log('PasswordChange:', PasswordChange); // Debugging for PasswordChange
+} else {
+    console.warn('Element with ID darkweb-info not found');
+}
+
+            // Update the "From" email address in email.html
+            const fromEmailElement = document.querySelector('#email-from');
+            const emailSubjectElement = document.querySelector('#email-subject');
+            if (fromEmailElement) {
+                if (profileInfo.name === 'Leila') {
+                    fromEmailElement.href = 'mailto:security@capit0l-tw0bank.com';
+                    fromEmailElement.textContent = 'security@capit0l-tw0bank.com';
+                    emailSubjectElement.innerHTML = "<strong>URGENT! Suspicious Activity Detected on Your Capital-Two Bank Account</strong>";
+                } else {
+                    fromEmailElement.href = 'mailto:security@capit0l-tw0bank.com';
+                    fromEmailElement.textContent = 'security@capit0l-tw0bank.com';
+                    emailSubjectElement.innerHTML = "<strong>URGENT! Suspicious Activity Detected on Your Capital-Two Bank Account - Marked as Spam!</strong>";
+                }
+            } else {
+                console.warn('Element with ID email-from not found');
+            }
+
+            // Update settings.html content only if profileNameElement exists
+            if (profileNameElements) {
+                pages['settings.html'] = `
+                    <div class="person-shield-icon-container" style="text-align: center;">
+                    <svg class="person-shield-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100" height="100">
+                        <path d="M12 2L4 5v6c0 5.25 3.75 10.74 8 12 4.25-1.26 8-6.75 8-12V5l-8-3zm0 2.18l6 2.25v5.57c0 4.25-2.75 8.74-6 9.93-3.25-1.19-6-5.68-6-9.93V6.43l6-2.25z"/>
+                        <path d="M12 8c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2s2-.9 2-2v-4c0-1.1-.9-2-2-2zm0 2h.01L12 14h-.01L12 10z"/>
+                    </svg>
+                    </div>
+                    <h1 style="text-align: center;">Phoogle account security</h1>
+                    <div style="width: 100%; max-width: 600px; margin: 0 auto; text-align: left;">
+                    <p><strong>Your account</strong></p>
+                     <div class="icon" id="profile-icon"></div>
+                <div style="width: 100%; max-width: 600px; margin: 0 auto; text-align: left;">
+                    <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; width: 100%;">
+                        <strong style="flex-shrink: 0;">Two-factor authentication</strong>
+                        <p style="margin-left: 20px; flex-grow: 1;">Two factor authentication adds a layer of protection to your account.</p>
+                        <label class="switch">
+                            <input type="checkbox" id="two-factor-switch">
+                            <span class="slider round"></span>
+                        </label>
+                </div>
+                    <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; width: 100%;">
+                        <strong style="flex-shrink: 0;">Password&nbsp<span id="password-info"></span></strong>
+                        <p style="margin-left: 20px; flex-grow: 1;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+                        <div style="display: flex; align-items: center;">
+                            <input type="password" id="password-input" value="${'*'.repeat(profileInfo.password.length)}" style="border: 1px solid #ccc; border-radius: 5px; padding: 5px; margin-right: 10px;">
+                            <span id="toggle-password" style="cursor: pointer;" onclick="togglePasswordVisibility('${profileInfo.password}')">
+                                <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M12 4.5C7.305 4.5 3.135 7.61 1.5 12c1.635 4.39 5.805 7.5 10.5 7.5s8.865-3.11 10.5-7.5c-1.635-4.39-5.805-7.5-10.5-7.5zm0 13c-3.038 0-5.5-2.462-5.5-5.5s2.462-5.5 5.5-5.5 5.5 2.462 5.5 5.5-2.462 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+                <div style="border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; width: 100%">
+                    <strong style="flex-shrink: 0;">Darkweb Scan</strong>
+                    <div style="margin-left: 20px;">
+                        <p>Based on the most recent scan, the following information of yours has been detected on the Dark Web: </p>
+                        <p id="darkweb-info"> has been found on the dark web</p>
+                    </div>
+                    </div>
+                </div>
+                </div>
+                `;
+        // Call updateSwitchSlider after updating settings.html content
+        updateSwitchSlider(profileInfo.phoogle);
+        }
+            console.log('Updated settings.html:', pages['settings.html']); // Debugging
+
+            const finstaElement = document.getElementById('finsta');
+            if (finstaElement) {
+                finstaElement.textContent = profileInfo.finsta;
+            } else {
+                console.warn('Element with ID finsta not found');
+            }
+        // Update browsing history
+        updateBrowsingHistory(profileInfo);
+        updateSnapgramContent(profileInfo);
+        }
+        
+
+            function updateBrowsingHistory(profileInfo) {
+                const browsingHistoryElement = document.getElementById('browsing-history');
+                if (browsingHistoryElement) {
+                    let historyContent = '';
+                    if (profileInfo.name === 'Leila') {
+                    historyContent = `
+                    <div class="content-row">
+                            <div class="left-column">8:30 AM</div>
+                            <div class="middle-column">Capital Two</div>
+                            <div class="right-column"><a href="#" onclick="navigate('CapitalTwo.com')">https://CapitalTwo.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">8:45 AM</div>
+                            <div class="middle-column">CompTIA Spark</div>
+                            <div class="right-column"><a href="#" onclick="navigate('comptiaspark.org')">https://www.comptiaspark.org</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">9:00 AM</div>
+                            <div class="middle-column">SnapGram</div>
+                            <div class="right-column"><a href="#" onclick="navigate('snapgram.com')">https://SnapGram.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">9:15 AM</div>
+                            <div class="middle-column">Email Inbox</div>
+                            <div class="right-column"><a href="#" onclick="navigate('inbox.html')">https://phooglemail.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">9:20 AM</div>
+                            <div class="middle-column">Capital Two</div>
+                            <div class="right-column"><a href="#" onclick="navigate('capit0ltw0bank.html')">http://Capit0lTw0.com</a></div>
+                        </div>
+                         <div class="content-row">
+                            <div class="left-column">9:30 AM</div>
+                            <div class="middle-column">Zoom Meeting</div>
+                            <div class="right-column"><a href="#" onclick="navigate('www.zoom.com/8675309')">https://www.zoom.com/8675309</a></div>
+                        </div>
+                         <div class="content-row">
+                            <div class="left-column">9:30 AM</div>
+                            <div class="middle-column">what is 2fa - Phoogle Search</div>
+                            <div class="right-column"><a href="#" onclick="navigate('phoogle.com')">https://phoogle.com</a></div>
+                        </div>
+                    `;
+                    } else if (profileInfo.name === 'Alejandro') {
+                    historyContent = `
+                        <div class="content-row">
+                            <div class="left-column">10:00 AM</div>
+                            <div class="middle-column">Email Inbox</div>
+                            <div class="right-column"><a href="#" onclick="navigate('inbox.html')">https://phooglemail.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">10:15 AM</div>
+                            <div class="middle-column">CompTIA Careers</div>
+                            <div class="right-column"><a href="#" onclick="navigate('explore.comptia.org/career')">https://explore.comptia.org/career</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">11:00 AM</div>
+                            <div class="middle-column">Capital Two</div>
+                            <div class="right-column"><a href="#" onclick="navigate('CapitalTwo.com')">https://CapitalTwo.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">11:30 AM</div>
+                            <div class="middle-column">Zoom Meeting</div>
+                            <div class="right-column"><a href="#" onclick="navigate('www.zoom.com/8675309')">https://www.zoom.com/8675309</a></div>
+                        </div>
+                         <div class="content-row">
+                            <div class="left-column">11:45 AM</div>
+                            <div class="middle-column">what dog parks are near me? - Phoogle Search</div>
+                            <div class="right-column"><a href="#" onclick="navigate('phoogle.com')">https://phoogle.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">1:15 PM</div>
+                            <div class="middle-column">CompTIA Spark</div>
+                            <div class="right-column"><a href="#" onclick="navigate('comptiaspark.org')">https://www.comptiaspark.org</a></div>
+                        </div>
+                    `;
+                    } else if (profileInfo.name === 'Sofia') {
+                    historyContent = `
+                    <div class="content-row">
+                            <div class="left-column">11:30 AM</div>
+                            <div class="middle-column">Zoom Meeting</div>
+                            <div class="right-column"><a href="#" onclick="navigate('www.zoom.com/8675309')">https://www.zoom.com/8675309</a></div>
+                        </div>    
+                    <div class="content-row">
+                            <div class="left-column">12:00 PM</div>
+                            <div class="middle-column">SnapGram</div>
+                            <div class="right-column"><a href="#" onclick="navigate('snapgram.com')">https://SnapGram.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">12:15 PM</div>
+                            <div class="middle-column">CompTIA Careers</div>
+                            <div class="right-column"><a href="#" onclick="navigate('explore.comptia.org/career')">https://explore.comptia.org/career</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">1:00 PM</div>
+                            <div class="middle-column">Email Inbox</div>
+                            <div class="right-column"><a href="#" onclick="navigate('inbox.html')">https://phooglemail.com</a></div>
+                        </div>
+                        <div class="content-row">
+                            <div class="left-column">1:15 PM</div>
+                            <div class="middle-column">CompTIA Spark</div>
+                            <div class="right-column"><a href="#" onclick="navigate('comptiaspark.org')">https://www.comptiaspark.org</a></div>
+                        </div>
+                         <div class="content-row">
+                            <div class="left-column">1:30 PM</div>
+                            <div class="middle-column">how do I change privacy settings on SnapGram? - Phoogle Search</div>
+                            <div class="right-column"><a href="#" onclick="navigate('phoogle.com')">https://phoogle.com</a></div>
+                        </div>
+                    `;
+                    }
+                    browsingHistoryElement.innerHTML = historyContent;
+                    console.log('Browsing history updated:', historyContent); // Debugging
+                } else {
+                    console.warn('Element with ID browsing-history not found');
+                }
+            }
+
+            function togglePasswordVisibility(password) {
+                const passwordInput = document.getElementById('password-input');
+                const eyeIcon = document.getElementById('eye-icon');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    passwordInput.value = password; // Display the actual password
+                    eyeIcon.innerHTML = '<path d="M12 4.5C7.305 4.5 3.135 7.61 1.5 12c1.635 4.39 5.805 7.5 10.5 7.5s8.865-3.11 10.5-7.5c-1.635-4.39-5.805-7.5-10.5-7.5zm0 13c-3.038 0-5.5-2.462-5.5-5.5s2.462-5.5 5.5-5.5 5.5 2.462 5.5 5.5-2.462 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/>';
+                } else {
+                    passwordInput.type = 'password';
+                    passwordInput.value = '*'.repeat(password.length); // Mask the password with the same number of stars as the password length
+                    eyeIcon.innerHTML = '<path d="M12 4.5C7.305 4.5 3.135 7.61 1.5 12c1.635 4.39 5.805 7.5 10.5 7.5s8.865-3.11 10.5-7.5c-1.635-4.39-5.805-7.5-10.5-7.5zm0 13c-3.038 0-5.5-2.462-5.5-5.5s2.462-5.5 5.5-5.5 5.5 2.462 5.5 5.5-2.462 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5s1.57 3.5 3.5 3.5 3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5z"/>';
+                }
+            }
+
+    // Update the switch slider based on the phoogle parameter
+
+    function updateSocialButton(profileInfo) {
+    const socialButton = document.getElementById('social-button');
+    const socialIcon = document.getElementById('social-icon');
+    const socialText = document.getElementById('social-text');
+    if (socialButton && socialIcon && socialText) {
+        console.log('Updating social button:', profileInfo.social); // Debugging
+        if (profileInfo.social === 'public') {
+            socialIcon.innerHTML = `
+                <svg class="world-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                </svg>
+            `;
+            socialText.textContent = 'Public Profile';
+        } else if (profileInfo.social === 'secure') {
+            socialIcon.innerHTML = '🔒'; // Using the lock icon
+            socialText.textContent = 'Secure Profile';
+        }
+        console.log('Social button updated:', socialIcon.innerHTML, socialText.textContent);
+    } else {
+        console.warn('Elements with IDs social-button, social-icon, or social-text not found');
+    }
+}
+
+function updateSwitchSlider(phoogle) {
+    const twoFactorSwitch = document.getElementById('two-factor-switch');
+    if (twoFactorSwitch) {
+        if (phoogle === 'complex') {
+            twoFactorSwitch.checked = true;
+        } else if (phoogle === 'weak') {
+            twoFactorSwitch.checked = false;
+        }
+    } else {
+        console.warn('Element with ID two-factor-switch not found');
+    }
+    console.warn(phoogle)
+}
+
+function updateInboxContent(params) {
+    const phishing = params.get('phishing');
+    const capitolTwoEmail = document.getElementById('capitolTwoEmail');
+    if (phishing === 'yes') {
+        capitolTwoEmail.style.display = 'flex';
+        // Check if the current profile is Alejandro and update the content
+        const profileName = params.get('name');
+        if (profileName === 'Alejandro') {
+            const middleColumn = capitolTwoEmail.querySelector('.middle-column');
+            if (middleColumn) {
+                middleColumn.innerHTML = "<strong>URGENT! Suspicious Activity Detected on your Capital-Two Bank Account</strong> <span style='font-size: smaller; font-style: italic;'>- Marked as Spam!</span>";
+            }
+        }
+    } else {
+        capitolTwoEmail.style.display = 'none';
+    }
+
+    const profileName = params.get('name');
+    const profileIcon = document.getElementById('profile-icon');
+    const profileNameElement = document.getElementById('profile-name');
+    if (profileIcon && profileNameElement) {
+        let iconSrc;
+        if (profileName === 'Leila') {
+            iconSrc = 'leila-avatar.png';
+        } else if (profileName === 'Alejandro') {
+            iconSrc = 'alejandro-avatar.png';
+        } else if (profileName === 'Sofia') {
+            iconSrc = 'sofia-avatar.png';
+        }
+        profileIcon.innerHTML = `<img src="${iconSrc}" alt="${profileName}">`;
+        profileNameElement.textContent = profileName;
+    }
+}
+
+        function displayProfileInfo() {
+            updateProfileInfo(profileParams);
+        }
+
+        function showErrorMessage() {
+        document.getElementById('error-message').style.display = 'block';
+    }
+
+    function displayDate() {
+        const dateElement = document.getElementById('date');
+        if (dateElement) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            dateElement.textContent = today.toLocaleDateString('en-US', options);
+        } else {
+            console.warn('Element with ID date not found');
+        }
+    }
+
+    function hideErrorMessage() {
+        document.getElementById('error-message').style.display = 'none';
+    }
+
+    function updateSuspiciousAmount(params) {
+            const amountElement = document.getElementById('suspicious-amount');
+            if (amountElement) {
+                const profileName = params.get('name');
+                if (profileName === 'Alejandro') {
+                    amountElement.textContent = '$1,200.00';
+                } else {
+                    amountElement.textContent = '$1200,00';
+                }
+            } else {
+                console.warn('Element with ID suspicious-amount not found');
+            }
+        }
+
+        function updateSnapgramContent(profileInfo) {
+            const snapgramContent = document.getElementById('snapgram-content');
+            let imageSrc;
+                if (profileInfo.name === 'Leila') {
+                    imageSrc = 'Leila.jpg';
+                } else if (profileInfo.name === 'Sofia') {
+                    imageSrc = 'Sofia Job.jpg';
+                }
+
+
+            if (snapgramContent) {
+                if (profileInfo.name === 'Alejandro') {
+                    snapgramContent.innerHTML = `
+
+                    <div class="profile-info">
+                                <div class="profile-header">
+                                    <button class="profile-button-black" id="social-button">
+                                        <span id="social-icon"></span>
+                                        <span id="social-text"></span>
+                                    </button>
+                                    <h2 id="finsta">${profileInfo.finsta}</h2>
+                                </div>
+                                <p><b>This Account is Public.</b></p>
+                                <p>
+                                    <strong>29</strong> posts <strong>571</strong> followers <strong>733</strong> following
+                                </p>
+                                <p><strong>${profileInfo.name}</strong></p>
+                            </div>
+                       <div class="card-container">
+                            <div class="card">
+                                <img src="Alejandro Birthday.jpg" alt="Card Image 1">
+                                <div class="card-header">What a great way to celebrate my birthday!</div>
+                                <div class="card-date">September 14, 2024</div>
+                            </div>
+                            <div class="card">
+                                <img src="Alejandro Celebrating.jpg" alt="Card Image 3">
+                                <div class="card-header">Enjoying the afternoon with this little guy!</div>
+                                <div class="card-date">October 1, 2024</div>
+                            </div>
+                            <div class="card">
+                                <img src="HolidayAndPuppy.jpg" alt="Card Image 2">
+                                <div class="card-header">Celebrating the holiday with our newest addition, Cinnamon!</div>
+                                <div class="card-date">December 24, 2024</div>
+                            </div>
+                            </div>
+                    `;
+                } else {
+                    snapgramContent.innerHTML = `
+                    <div class="profile-container">
+                        <div class="profile-container">
+                            <div class="profile-image">
+                                <img src="${imageSrc}" style="width: 200px; height: auto; margin-right: 20px;" />
+                            </div>
+                            <div class="profile-info">
+                                <div class="profile-header">
+                                    <button class="profile-button-black" id="social-button">
+                                        <span id="social-icon"></span>
+                                        <span id="social-text"></span>
+                                    </button>
+                                    <h2 id="finsta">${profileInfo.finsta}</h2>
+                                </div>
+                                <p><b>This Account is Private. Request to follow to see their profile and posts.</b></p>
+                                <p>
+                                    <strong>9</strong> posts <strong>71</strong> followers <strong>33</strong> following
+                                </p>
+                                <p><strong>${profileInfo.name}</strong></p>
+                            </div>
+                        </div>
+                    `;
+                }
+                updateSocialButton(profileInfo);
+
+            } else {
+                console.warn('Element with ID snapgram-content not found');
+            }
+        }
+                                           
+
+    window.onload = function() {
+        displayProfileInfo();
+        displayDate();
+        updateSuspiciousDate();
+        updateSuspiciousAmount();
+        updateSnapgramContent(profileInfo);
+  };
+    </script>
+</head>
+<body>
+    <div class="browser">
+        <div class="toolbar">
+            <button onclick="goBack()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+                </svg>
+            </button>
+            <button onclick="goForward()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/>
+                </svg>
+            </button>
+            <button onclick="redirectToProfile()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+            </button>
+            <div class="address-bar">
+                <span class="lock" onclick="showPopup()">🔓</span>
+                <input type="text" id="address" value="" readonly>
+            </div>
+            <div class="profile-icon" onmouseover="showDropdown()" onmouseout="hideDropdown()">
+                P
+                <div class="dropdown-content" id="profile-dropdown" onmouseover="showDropdown()" onmouseout="hideDropdown()">
+                    <a href="#" onclick="navigateToBrowser('Alejandro')">Alejandro</a>
+                    <a href="#" onclick="navigateToBrowser('Leila')">Leila</a>
+                    <a href="#" onclick="navigateToBrowser('Sofia')">Sofia</a>
+                </div>
+            </div>
+        </div>
+        <div class="content" id="content">
+            <div class="container">
+                <h1>Choose a Profile</h1>
+                <div class="profile-button" onclick="navigateToBrowser('Leila')">
+                    <img src="leila-avatar.png" alt="Leila">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                    </svg>
+                    <span>Leila</span>
+                </div>
+                <div class="profile-button" onclick="navigateToBrowser('Alejandro')">
+                    <img src="alejandro-avatar.png" alt="Alejandro">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                    </svg>
+                    <span>Alejandro</span>
+                </div>
+                <div class="profile-button" onclick="navigateToBrowser('Sofia')">
+                    <img src="sofia-avatar.png" alt="Sofia">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path d="M12 8V4l-8 8 8 8v-4h8v-8z"/>
+                    </svg>
+                    <span>Sofia</span>
+                </div>
+            </div>
+        </div>
+        <div class="popup" id="popup">
+            <p>Security<br>This site is not secure.</p>
+            <button onclick="closePopup()">Close</button>
+        </div>
+    </div>
+</body>
+</html>                           
